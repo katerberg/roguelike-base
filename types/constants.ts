@@ -9,26 +9,26 @@ export const colors = {
 };
 
 export const movementKeymap = {
-  38: 0, // Up
-  75: 0, // Up (vim)
-  87: 0, // Up (wsad)
-  39: 1, // Right
-  76: 1, // Right (vim)
-  68: 1, // Right (wsad)
-  40: 2, // Down
-  74: 2, // Down (vim)
-  83: 2, // Down (wsad)
-  37: 3, // Left
-  72: 3, // Left (vim)
-  65: 3, // Left (wsad)
+  ArrowUp: 0, // Up
+  k: 0, // Up (vim)
+  w: 0, // Up (wsad)
+  ArrowRight: 1, // Right
+  l: 1, // Right (vim)
+  d: 1, // Right (wsad)
+  ArrowDown: 2, // Down
+  j: 2, // Down (vim)
+  s: 2, // Down (wsad)
+  ArrowLeft: 3, // Left
+  a: 3, // Left (vim)
+  h: 3, // Left (wsad)
 };
 
 export const validKeymap = {
   ...movementKeymap,
-  71: 'Gear', // G
-  73: 'Gear', // I
-  27: 'Menu', // Esc
-  77: 'Menu', // M
+  // 71: 'Gear', // G
+  // 73: 'Gear', // I
+  // 27: 'Menu', // Esc
+  // 77: 'Menu', // M
 };
 
 export const validMenuKeymap = {

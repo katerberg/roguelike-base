@@ -2,17 +2,20 @@ import 'regenerator-runtime/runtime';
 import {Display, Scheduler} from 'rot-js';
 
 import SchedulerType from 'rot-js/lib/scheduler/scheduler';
-import Simple from 'rot-js/lib/scheduler/simple';
+import {Actor} from '../types/Actor';
 import {dimensions} from '../types/constants';
+import {Player} from './Player';
 
 export class Game {
   display: Display;
+
+  player!: Player;
 
   devMode: boolean;
 
   level!: number;
 
-  scheduler!: SchedulerType<Simple>;
+  scheduler!: SchedulerType<Actor>;
 
   constructor() {
     this.display = new Display({width: dimensions.WIDTH, height: dimensions.HEIGHT});
@@ -27,11 +30,27 @@ export class Game {
   resetAll(): void {
     this.level = 0;
     this.scheduler = new Scheduler.Simple();
+    this.populatePlayer();
     this.init();
   }
 
+  createActor<T extends Actor>(
+    ActorClass: {new (game: Game, x: number, y: number, ...params: unknown[]): T},
+    params = [],
+  ): T {
+    // const key = this.popOpenFreeSpace();
+    const key = '0,0';
+    const [x, y] = key.split(',').map((i) => parseInt(i, 10));
+    return new ActorClass(this, x, y, ...params);
+  }
+
+  populatePlayer(): void {
+    this.player = this.createActor(Player);
+    this.scheduler.add(this.player, true);
+  }
+
   async nextTurn(): Promise<boolean> {
-    const actor = this.scheduler.next();
+    const actor: Actor = this.scheduler.next();
     if (!actor) {
       return false;
     }
