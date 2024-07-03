@@ -3,8 +3,8 @@ import {Display, Scheduler} from 'rot-js';
 
 import SchedulerType from 'rot-js/lib/scheduler/scheduler';
 import {Actor} from '../types/Actor';
-import {dimensions} from '../types/constants';
-import {DungeonMap} from '../types/sharedTypes';
+import {dimensions, symbols} from '../types/constants';
+import {DungeonMap, VisibilityStatus} from '../types/sharedTypes';
 import {generateMap} from './mapHelper';
 import {Player} from './Player';
 
@@ -33,13 +33,21 @@ export class Game {
 
   resetAll(): void {
     this.level = 0;
-    this.dungeonMap = {
-      levels: [],
-    };
     this.scheduler = new Scheduler.Simple();
-    this.populatePlayer();
     this.dungeonMap = generateMap();
+    this.drawWalls();
+    this.populatePlayer();
     this.init();
+  }
+
+  drawWalls(): void {
+    for (let i = 0; i < dimensions.WIDTH; i++) {
+      for (let j = 1; j < dimensions.HEIGHT; j++) {
+        if (this.dungeonMap.levels[this.level].cells[`${i},${j}`].visibilityStatus === VisibilityStatus.Unseen) {
+          this.display.draw(i, j, symbols.WALL, null, null);
+        }
+      }
+    }
   }
 
   createActor<T extends Actor>(
@@ -67,6 +75,7 @@ export class Game {
   }
 
   async init(): Promise<void> {
+    this.drawWalls();
     // eslint-disable-next-line no-constant-condition
     while (1) {
       // eslint-disable-next-line no-await-in-loop
