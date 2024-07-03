@@ -4,10 +4,14 @@ import {Display, Scheduler} from 'rot-js';
 import SchedulerType from 'rot-js/lib/scheduler/scheduler';
 import {Actor} from '../types/Actor';
 import {dimensions} from '../types/constants';
+import {DungeonMap} from '../types/sharedTypes';
+import {generateMap} from './mapHelper';
 import {Player} from './Player';
 
 export class Game {
   display: Display;
+
+  dungeonMap!: DungeonMap;
 
   player!: Player;
 
@@ -29,8 +33,12 @@ export class Game {
 
   resetAll(): void {
     this.level = 0;
+    this.dungeonMap = {
+      levels: [],
+    };
     this.scheduler = new Scheduler.Simple();
     this.populatePlayer();
+    this.dungeonMap = generateMap();
     this.init();
   }
 
