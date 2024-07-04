@@ -8,8 +8,14 @@ export class Player implements EventListenerObject, Actor {
 
   game: Game;
 
-  constructor(game: Game) {
+  x: number;
+
+  y: number;
+
+  constructor(game: Game, x: number, y: number) {
     this.game = game;
+    this.x = x;
+    this.y = y;
   }
 
   listenForInput(): void {
@@ -46,5 +52,14 @@ export class Player implements EventListenerObject, Actor {
     // } else if (validKeymap[keyCode] === 'Gear') {
     //   this.handleOpenInventory();
     // }
+  }
+
+  draw(x?: number, y?: number): void {
+    const oldX = this.x;
+    const oldY = this.y;
+    this.x = x || oldX;
+    this.y = y || oldY;
+    this.game.drawFov();
+    // this.drawHp();
   }
 }
