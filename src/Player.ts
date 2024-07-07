@@ -1,5 +1,7 @@
+import {DIRS} from 'rot-js';
 import {Actor} from '../types/Actor';
-import {validKeymap} from '../types/constants';
+// import {movementKeymap, validKeymap} from '../types/constants';
+import {MovementKey, getMovement, ValidKey, isValidKey, isMovementKey} from '../types/keymaps';
 import {Game} from './Game';
 
 export class Player implements EventListenerObject, Actor {
@@ -29,6 +31,62 @@ export class Player implements EventListenerObject, Actor {
     });
   }
 
+  handleMovement(key: MovementKey): void {
+    // const foo = movementKeymap[key];
+    const [xChange, yChange] = DIRS[4][getMovement(key)];
+    const newX = this.x + xChange;
+    const newY = this.y + yChange;
+    // const newSpace = `${newX},${newY}`;
+    if (!this.game.isValidCoordinate(newX, newY)) {
+      return;
+    }
+    // const enemyInSpace = this.game.getEnemyAt(newSpace);
+    // if (enemyInSpace) {
+    //   enemyInSpace.takeDamage(this.getDamage(), this);
+    //   return this.resolver();
+    // }
+    this.draw(newX, newY);
+    // const contents = this.game.retrieveContents(this.coordinates);
+    // if (contents instanceof Cache) {
+    //   if (contents.type === 'Potion') {
+    //     this.game.sendMessage(`Tastes awful, but heals ${contents.modifiers.hp}.`);
+    //     this.currentHp += contents.modifiers.hp;
+    //     if (this.currentHp > this.effectiveMaxHp) {
+    //       this.currentHp = this.effectiveMaxHp;
+    //     }
+    //     this.game.removeCache(this.coordinates);
+    //     this.drawHp();
+    //     this.resolver();
+    //   } else {
+    //     const pickupResponse = this.buildModalCallback((res) => {
+    //       if (res) {
+    //         this.game.removeCache(this.coordinates);
+    //         this.equip(contents);
+    //       }
+    //       this.resolver();
+    //     });
+    //     new Modal(
+    //       this.game.display,
+    //       pickupResponse,
+    //       `${contents.display}. Would you like to equip it?`,
+    //       20,
+    //       20,
+    //       5,
+    //       modalChoices.yn,
+    //     );
+    //   }
+    // } else if (contents instanceof Ladder) {
+    //   const nextLevelResponse = this.buildModalCallback((res) => {
+    //     if (res) {
+    //       this.game.nextLevel();
+    //     }
+    //   });
+    //   new Modal(this.game.display, nextLevelResponse, 'Are you ready to delve deeper?', 20, 20, 5, modalChoices.yn);
+    // } else {
+    this.resolver();
+    // }
+  }
+
   handleEvent(evt: KeyboardEvent): void {
     const {key} = evt;
     // if (keyCode === 81 && this.game.devmode) {
@@ -39,19 +97,19 @@ export class Player implements EventListenerObject, Actor {
     //   // E
     //   this.levelUp();
     // }
-    if (!(key in validKeymap)) {
+    if (!isValidKey(key)) {
       if (this.game.devMode) {
         console.log(`Key is ${key}`); // eslint-disable-line no-console
       }
     }
     // this.game.clearMessage();
-    // if (keyCode in movementKeymap) {
-    //   this.handleMovement(keyCode);
-    // } else if (validKeymap[keyCode] === 'Menu') {
-    //   this.handleOpenMenu();
-    // } else if (validKeymap[keyCode] === 'Gear') {
-    //   this.handleOpenInventory();
-    // }
+    if (isMovementKey(key)) {
+      this.handleMovement(key);
+      // } else if (validKeymap[keyCode] === 'Menu') {
+      //   this.handleOpenMenu();
+      // } else if (validKeymap[keyCode] === 'Gear') {
+      //   this.handleOpenInventory();
+    }
   }
 
   draw(x?: number, y?: number): void {

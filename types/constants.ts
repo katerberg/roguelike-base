@@ -8,37 +8,6 @@ export const colors = {
   FADED_WHITE: '#777',
 };
 
-export const movementKeymap = {
-  ArrowUp: 0, // Up
-  k: 0, // Up (vim)
-  w: 0, // Up (wsad)
-  ArrowRight: 1, // Right
-  l: 1, // Right (vim)
-  d: 1, // Right (wsad)
-  ArrowDown: 2, // Down
-  j: 2, // Down (vim)
-  s: 2, // Down (wsad)
-  ArrowLeft: 3, // Left
-  a: 3, // Left (vim)
-  h: 3, // Left (wsad)
-};
-
-export const validKeymap = {
-  ...movementKeymap,
-  // 71: 'Gear', // G
-  // 73: 'Gear', // I
-  // 27: 'Menu', // Esc
-  // 77: 'Menu', // M
-};
-
-export const validMenuKeymap = {
-  ...movementKeymap,
-  27: 'Cancel', // Esc
-  77: 'Cancel', // M
-  13: 'Select', // Enter
-  32: 'Select', // Space
-};
-
 export const dimensions = {
   HEIGHT: 25,
   WIDTH: 80,
