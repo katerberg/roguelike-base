@@ -32,12 +32,11 @@ export class Player implements EventListenerObject, Actor {
   }
 
   handleMovement(key: MovementKey): void {
-    // const foo = movementKeymap[key];
     const [xChange, yChange] = DIRS[4][getMovement(key)];
     const newX = this.x + xChange;
     const newY = this.y + yChange;
     // const newSpace = `${newX},${newY}`;
-    if (!this.game.isValidCoordinate(newX, newY)) {
+    if (!this.game.isFreeCell(newX, newY)) {
       return;
     }
     // const enemyInSpace = this.game.getEnemyAt(newSpace);
