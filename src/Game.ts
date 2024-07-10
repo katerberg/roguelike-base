@@ -5,8 +5,9 @@ import * as tinycolor from 'tinycolor2';
 // import {v4 as uuid} from 'uuid';
 import {Actor} from '../types/Actor';
 import {colors, dimensions, symbols} from '../types/constants';
-import {Cell, Coordinate, DungeonMap, MapLevel, VisibilityStatus} from '../types/sharedTypes';
+import {Cell, CellType, Coordinate, DungeonMap, MapLevel, VisibilityStatus} from '../types/sharedTypes';
 import {generateMap} from './mapHelper';
+import {coordsToNumberCoords} from './math';
 import {Player} from './Player';
 
 export class Game {
@@ -117,7 +118,7 @@ export class Game {
       // } else if (this.exit.matches(keyFormat)) {
       //   symbol = symbols.LADDER;
       //   color = colors.WHITE;
-    } else if (!this.currentLevel.cells[keyFormat]) {
+    } else if (this.currentLevel.cells[keyFormat].type === CellType.Wall) {
       symbol = symbols.WALL;
       color = colors.WHITE;
     }
@@ -126,19 +127,21 @@ export class Game {
   }
 
   drawFov(): void {
-    // const currentRun = uuid();
     const fov = new FOV.PreciseShadowcasting(this.lightPasses.bind(this));
+    const seenThisRun: {[cellKey: Coordinate]: boolean} = {};
     fov.compute(this.player.x, this.player.y, 500, (x, y) => {
       const key: Coordinate = `${x},${y}`;
+      seenThisRun[key] = true;
       this.currentLevel.cells[key].visibilityStatus = VisibilityStatus.Visible;
       this.redrawSpace(x, y, this.currentLevel.cells[key].visibilityStatus !== VisibilityStatus.Visible);
     });
-    // Object.keys(this.seenSpaces)
-    //   .filter((s) => this.seenSpaces[s] !== currentRun)
-    //   .forEach((s) => {
-    //     const [x, y] = s.split(',').map((c) => parseInt(c, 10));
-    //     this.redrawSpace(x, y, true);
-    //   });
+    (Object.keys(this.currentLevel.cells) as Coordinate[]).forEach((key) => {
+      if (this.currentLevel.cells[key].visibilityStatus === VisibilityStatus.Visible && !seenThisRun[key]) {
+        this.currentLevel.cells[key].visibilityStatus = VisibilityStatus.Seen;
+        const numberCoordinates = coordsToNumberCoords(key);
+        this.redrawSpace(numberCoordinates.x, numberCoordinates.y, true);
+      }
+    });
   }
 
   async nextTurn(): Promise<boolean> {
