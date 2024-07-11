@@ -32,13 +32,6 @@ export const symbols = {
   BULLET: '▶',
 };
 
-export const modalChoices = {
-  yn: {
-    89: true, // Y
-    78: false, // N
-  },
-};
-
 export const gearTypes = {
   Armor: 5,
   Weapon: 5,

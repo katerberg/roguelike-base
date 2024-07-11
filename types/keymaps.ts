@@ -52,6 +52,7 @@ export function getMovement(key: MovementKey): MovementKeymap {
       return MovementKeymap.ArrowLeft;
   }
 }
+
 // export const movementKeymap = {
 //   ArrowUp: 0, // Up
 //   k: 0, // Up (vim)
@@ -82,3 +83,10 @@ export function getMovement(key: MovementKey): MovementKeymap {
 //   13: 'Select', // Enter
 //   32: 'Select', // Space
 // };
+
+export const modalChoices = {
+  yn: {
+    y: 'true', // Y
+    n: 'false', // N
+  },
+};

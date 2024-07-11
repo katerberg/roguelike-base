@@ -1,8 +1,8 @@
 import {DIRS} from 'rot-js';
 import {Actor} from '../types/Actor';
-// import {movementKeymap, validKeymap} from '../types/constants';
-import {MovementKey, getMovement, ValidKey, isValidKey, isMovementKey} from '../types/keymaps';
+import {MovementKey, getMovement, isValidKey, isMovementKey, modalChoices} from '../types/keymaps';
 import {Game} from './Game';
+import {Modal} from './Modal';
 
 export class Player implements EventListenerObject, Actor {
   // eslint-disable-next-line class-methods-use-this
@@ -18,6 +18,10 @@ export class Player implements EventListenerObject, Actor {
     this.game = game;
     this.x = x;
     this.y = y;
+  }
+
+  releaseInput(): void {
+    window.removeEventListener('keydown', this);
   }
 
   listenForInput(): void {
@@ -45,6 +49,7 @@ export class Player implements EventListenerObject, Actor {
     //   return this.resolver();
     // }
     this.draw(newX, newY);
+    const cell = this.game.currentLevel.cells[`${this.x},${this.y}`];
     // const contents = this.game.retrieveContents(this.coordinates);
     // if (contents instanceof Cache) {
     //   if (contents.type === 'Potion') {
@@ -58,7 +63,7 @@ export class Player implements EventListenerObject, Actor {
     //     this.resolver();
     //   } else {
     //     const pickupResponse = this.buildModalCallback((res) => {
-    //       if (res) {
+    //       if (res === 'true') {
     //         this.game.removeCache(this.coordinates);
     //         this.equip(contents);
     //       }
@@ -74,16 +79,30 @@ export class Player implements EventListenerObject, Actor {
     //       modalChoices.yn,
     //     );
     //   }
-    // } else if (contents instanceof Ladder) {
-    //   const nextLevelResponse = this.buildModalCallback((res) => {
-    //     if (res) {
-    //       this.game.nextLevel();
-    //     }
-    //   });
-    //   new Modal(this.game.display, nextLevelResponse, 'Are you ready to delve deeper?', 20, 20, 5, modalChoices.yn);
-    // } else {
-    this.resolver();
-    // }
+    // } else
+    if (cell.isExit) {
+      const nextLevelResponse = this.buildModalCallback((res?: string) => {
+        if (res === 'true') {
+          //   this.game.nextLevel();
+          // console.log('next level');
+        }
+      });
+      new Modal(this.game.display, nextLevelResponse, 'Are you ready to delve deeper?', 20, 20, 5, modalChoices.yn);
+    } else {
+      this.resolver();
+    }
+  }
+
+  buildModalCallback(callback?: (res?: string) => void): (res?: string) => void {
+    this.releaseInput();
+    return (res?) => {
+      if (callback) {
+        callback(res);
+      }
+
+      this.game.rebuild();
+      this.listenForInput();
+    };
   }
 
   handleEvent(evt: KeyboardEvent): void {

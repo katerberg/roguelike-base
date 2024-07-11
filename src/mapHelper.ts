@@ -24,14 +24,11 @@ export function generateMap(): DungeonMap {
       }
     }
 
-    const digger = new Map.Digger(
-      Math.ceil(dimensions.WIDTH - 50 + Math.pow(levelNumber, 2) / 2),
-      dimensions.HEIGHT - 1,
-      {
-        dugPercentage: levelNumber * 0.1,
-        corridorLength: [0, 5],
-      },
-    );
+    const digger = new Map.Digger(Math.ceil(dimensions.WIDTH - 50 + Math.pow(levelNumber, 2) / 2), dimensions.HEIGHT, {
+      dugPercentage: levelNumber * 0.1,
+      // dugPercentage: 0.9,
+      corridorLength: [0, 5],
+    });
 
     const digCallback = (x: number, y: number, value: number): void => {
       if (value) {

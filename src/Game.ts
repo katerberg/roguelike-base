@@ -37,14 +37,33 @@ export class Game {
     this.level = 0;
     this.scheduler = new Scheduler.Simple();
     this.dungeonMap = generateMap();
+    this.dungeonMap.levels.forEach((level) => {
+      level.exits = [];
+      // this.popOpenFreeSpace
+    });
     this.drawWalls();
     this.populatePlayer();
     this.init();
   }
 
+  rebuild(): void {
+    this.drawWalls();
+    this.currentLevel.exits.forEach((exit) => {
+      this.display.draw(exit.x, exit.y, symbols.LADDER, colors.WHITE, null);
+    });
+    this.player.draw();
+    // this.enemies.forEach(e => e.draw());
+  }
+
+  // addExitLadder(): void {
+  //   const ladderCell = this.popOpenFreeSpace();
+  //   ladderCell.type = CellType.Exit;
+  //   this.exit = new Ladder(ladderCell.x, ladderCell.y);
+  // }
+
   drawWalls(): void {
     for (let i = 0; i < dimensions.WIDTH; i++) {
-      for (let j = 1; j < dimensions.HEIGHT; j++) {
+      for (let j = 0; j < dimensions.HEIGHT; j++) {
         if (this.currentLevel.cells[`${i},${j}`].visibilityStatus === VisibilityStatus.Unseen) {
           this.display.draw(i, j, symbols.WALL, null, null);
         }
@@ -115,9 +134,9 @@ export class Game {
       // } else if (this.caches[keyFormat]) {
       //   symbol = symbols[this.caches[keyFormat].type.toUpperCase()];
       //   color = colors.GREEN;
-      // } else if (this.exit.matches(keyFormat)) {
-      //   symbol = symbols.LADDER;
-      //   color = colors.WHITE;
+    } else if (this.currentLevel.exits.some((exit) => exit.matches(keyFormat))) {
+      symbol = symbols.LADDER;
+      color = colors.WHITE;
     } else if (this.currentLevel.cells[keyFormat].type === CellType.Wall) {
       symbol = symbols.WALL;
       color = colors.WHITE;
