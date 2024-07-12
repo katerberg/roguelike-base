@@ -1,4 +1,4 @@
-import {Ladder} from '../src/Ladder';
+import {MapLevel} from '../src/MapLevel';
 
 export type DungeonMap = {
   levels: MapLevel[];
@@ -59,10 +59,9 @@ export type Cell = {
   items: Item[];
 };
 
-export type MapLevel = {
-  playerSpawn: Coordinate;
-  exits: Ladder[];
-  cells: {
-    [key: Coordinate]: Cell;
-  };
-};
+// export type MapLevel = {
+//   exits: Ladder[];
+//   cells: {
+//     [key: Coordinate]: Cell;
+//   };
+// };

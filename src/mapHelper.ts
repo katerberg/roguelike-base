@@ -1,13 +1,14 @@
 import {Map} from 'rot-js';
 import {dimensions} from '../types/constants';
 import {CellType, Coordinate, DungeonMap, VisibilityStatus} from '../types/sharedTypes';
+import {MapLevel} from './MapLevel';
 
 export function generateMap(): DungeonMap {
   const dungeonMap: DungeonMap = {
     levels: [],
   };
   for (let levelNumber = 0; levelNumber < 10; levelNumber++) {
-    dungeonMap.levels[levelNumber] = {cells: {}, exits: [], playerSpawn: '0,0'};
+    dungeonMap.levels[levelNumber] = new MapLevel();
     for (let y = 0; y < dimensions.HEIGHT; y++) {
       for (let x = 0; x < dimensions.WIDTH; x++) {
         dungeonMap.levels[levelNumber].cells[`${x},${y}`] = {
@@ -25,8 +26,8 @@ export function generateMap(): DungeonMap {
     }
 
     const digger = new Map.Digger(Math.ceil(dimensions.WIDTH - 50 + Math.pow(levelNumber, 2) / 2), dimensions.HEIGHT, {
-      dugPercentage: levelNumber * 0.1,
-      // dugPercentage: 0.9,
+      // dugPercentage: levelNumber * 0.1,
+      dugPercentage: 0.9,
       corridorLength: [0, 5],
     });
 

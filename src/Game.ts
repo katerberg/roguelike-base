@@ -5,8 +5,9 @@ import * as tinycolor from 'tinycolor2';
 // import {v4 as uuid} from 'uuid';
 import {Actor} from '../types/Actor';
 import {colors, dimensions, symbols} from '../types/constants';
-import {Cell, CellType, Coordinate, DungeonMap, MapLevel, VisibilityStatus} from '../types/sharedTypes';
+import {Cell, CellType, Coordinate, DungeonMap, VisibilityStatus} from '../types/sharedTypes';
 import {generateMap} from './mapHelper';
+import {MapLevel} from './MapLevel';
 import {coordsToNumberCoords} from './math';
 import {Player} from './Player';
 

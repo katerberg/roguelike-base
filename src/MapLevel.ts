@@ -2,8 +2,6 @@ import {Cell, Coordinate} from '../types/sharedTypes';
 import {Ladder} from './Ladder';
 
 export class MapLevel {
-  playerSpawn: Coordinate;
-
   exits: Ladder[];
 
   cells: {
@@ -12,5 +10,6 @@ export class MapLevel {
 
   constructor() {
     this.exits = [];
+    this.cells = {};
   }
 }
