@@ -44,7 +44,6 @@ export class Game {
     }
     this.dungeonMap.levels.forEach((level) => {
       level.exits = [];
-      // this.popOpenFreeSpace
     });
     this.drawWalls();
     this.populatePlayer();
@@ -58,6 +57,23 @@ export class Game {
     });
     this.player.draw();
     // this.enemies.forEach(e => e.draw());
+  }
+
+  nextLevel() {
+    this.scheduler.clear();
+    this.scheduler.add(this.player, true);
+    this.level += 1;
+    // this.enemies.length = 0;
+    // this.generateMap();
+    // this.populateEnemies();
+    // this.drawLevel();
+    // this.seenSpaces = {};
+    if (!this.currentLevel.isFreeCell(this.player.x, this.player.y)) {
+      const cell = this.currentLevel.popOpenFreeSpace();
+      this.player.draw(cell.x, cell.y);
+    }
+    this.drawWalls();
+    this.drawFov();
   }
 
   drawWalls(): void {

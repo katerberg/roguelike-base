@@ -83,7 +83,7 @@ export class Player implements EventListenerObject, Actor {
     if (cell.isExit) {
       const nextLevelResponse = this.buildModalCallback((res?: string) => {
         if (res === 'true') {
-          //   this.game.nextLevel();
+          this.game.nextLevel();
           console.log('next level');
         }
       });
@@ -107,11 +107,10 @@ export class Player implements EventListenerObject, Actor {
 
   handleEvent(evt: KeyboardEvent): void {
     const {key} = evt;
-    // if (keyCode === 81 && this.game.devmode) {
-    //   // Q
-    //   this.game.nextLevel();
-    // }
-    // if (keyCode === 69 && this.game.devmode) {
+    if (key === 'q' && this.game.devMode) {
+      this.game.nextLevel();
+    }
+    // if (key === 'e' && this.game.devMode) {
     //   // E
     //   this.levelUp();
     // }
