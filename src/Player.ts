@@ -40,7 +40,7 @@ export class Player implements EventListenerObject, Actor {
     const newX = this.x + xChange;
     const newY = this.y + yChange;
     // const newSpace = `${newX},${newY}`;
-    if (!this.game.isFreeCell(newX, newY)) {
+    if (!this.game.currentLevel.isFreeCell(newX, newY)) {
       return;
     }
     // const enemyInSpace = this.game.getEnemyAt(newSpace);

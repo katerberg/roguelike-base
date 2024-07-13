@@ -1,10 +1,13 @@
-import {Map} from 'rot-js';
+import {Map, RNG} from 'rot-js';
 import {dimensions} from '../types/constants';
 import {Cell, CellType, Coordinate, VisibilityStatus} from '../types/sharedTypes';
+import {Game} from './Game';
 import {Ladder} from './Ladder';
 
 export class MapLevel {
   levelNumber: number;
+
+  game: Game;
 
   exits: Ladder[];
 
@@ -12,8 +15,9 @@ export class MapLevel {
     [key: Coordinate]: Cell;
   };
 
-  constructor({levelNumber}: {levelNumber: number}) {
+  constructor({levelNumber, game}: {game: Game; levelNumber: number}) {
     this.levelNumber = levelNumber;
+    this.game = game;
     this.exits = [];
     this.cells = {};
 
@@ -34,8 +38,8 @@ export class MapLevel {
     }
 
     const digger = new Map.Digger(Math.ceil(dimensions.WIDTH - 50 + Math.pow(levelNumber, 2) / 2), dimensions.HEIGHT, {
-      // dugPercentage: levelNumber * 0.1,
-      dugPercentage: 0.9,
+      dugPercentage: levelNumber * 0.1,
+      // dugPercentage: 0.9,
       corridorLength: [0, 5],
     });
 
@@ -58,5 +62,44 @@ export class MapLevel {
       };
     };
     digger.create(digCallback);
+
+    this.addExitLadder();
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  isValidCoordinate(x: number, y: number): boolean {
+    return x >= 0 && x < dimensions.WIDTH && y >= 0 && y < dimensions.HEIGHT;
+  }
+
+  isFreeCell(x: number, y: number): boolean {
+    // const level = mapLevel !== undefined ? mapLevel : this.currentLevel;
+    return (
+      this.isValidCoordinate(x, y) &&
+      // (!game.dungeonMap?.[level] ||
+      //   this.currentLevel.monsters.every((monster) => monster.x !== x || monster.y !== y)) &&
+      this.isFreeOfStandingPlayers(x, y) &&
+      this.cells[`${x},${y}`].isPassable
+    );
+  }
+
+  isFreeOfStandingPlayers(x: number, y: number): boolean {
+    return !this.game.player || this.game.player.x !== x || this.game.player.y !== y;
+  }
+
+  popOpenFreeSpace(): Cell {
+    const index = Math.floor(RNG.getUniform() * this.freeCells.length);
+    return this.freeCells.slice(index, index + 1)[0];
+  }
+
+  addExitLadder(): void {
+    const ladderCell = this.popOpenFreeSpace();
+    this.cells[`${ladderCell.x},${ladderCell.y}`].isExit = true;
+    this.cells[`${ladderCell.x},${ladderCell.y}`].type = CellType.Exit;
+    ladderCell.type = CellType.Exit;
+    this.exits.push(new Ladder(ladderCell.x, ladderCell.y));
+  }
+
+  get freeCells(): Cell[] {
+    return Object.values(this.cells).filter((cell) => this.isFreeCell(cell.x, cell.y));
   }
 }
