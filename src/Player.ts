@@ -84,7 +84,7 @@ export class Player implements EventListenerObject, Actor {
       const nextLevelResponse = this.buildModalCallback((res?: string) => {
         if (res === 'true') {
           //   this.game.nextLevel();
-          // console.log('next level');
+          console.log('next level');
         }
       });
       new Modal(this.game.display, nextLevelResponse, 'Are you ready to delve deeper?', 20, 20, 5, modalChoices.yn);

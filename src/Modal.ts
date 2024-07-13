@@ -39,13 +39,13 @@ export class Modal implements EventListenerObject {
   }
 
   handleEvent(evt: KeyboardEvent): void {
-    const {keyCode} = evt;
-    if (this.modalChoices && !(keyCode in this.modalChoices)) {
+    const {key} = evt;
+    if (this.modalChoices && !(key in this.modalChoices)) {
       return;
     }
     const choices = this.modalChoices || {};
     window.removeEventListener('keydown', this as EventListenerObject);
-    this.callback(choices[keyCode]);
+    this.callback(choices[key]);
   }
 
   addOutline(): void {
