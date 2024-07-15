@@ -3,7 +3,7 @@ import {Display, FOV, Scheduler} from 'rot-js';
 import SchedulerType from 'rot-js/lib/scheduler/scheduler';
 import * as tinycolor from 'tinycolor2';
 import {Actor} from '../types/Actor';
-import {colors, dimensions, symbols} from '../types/constants';
+import {colors, dimensions, MAX_LEVEL, symbols} from '../types/constants';
 import {CellType, Coordinate, DungeonMap, VisibilityStatus} from '../types/sharedTypes';
 import {MapLevel} from './MapLevel';
 import {coordsToNumberCoords} from './math';
@@ -39,7 +39,7 @@ export class Game {
     this.dungeonMap = {
       levels: [],
     };
-    for (let levelNumber = 0; levelNumber < 10; levelNumber++) {
+    for (let levelNumber = 0; levelNumber <= MAX_LEVEL; levelNumber++) {
       this.dungeonMap.levels[levelNumber] = new MapLevel({levelNumber, game: this});
     }
     this.dungeonMap.levels.forEach((level) => {
@@ -59,15 +59,13 @@ export class Game {
     // this.enemies.forEach(e => e.draw());
   }
 
-  nextLevel() {
+  nextLevel(): void {
+    if (this.level === MAX_LEVEL) {
+      return;
+    }
     this.scheduler.clear();
     this.scheduler.add(this.player, true);
     this.level += 1;
-    // this.enemies.length = 0;
-    // this.generateMap();
-    // this.populateEnemies();
-    // this.drawLevel();
-    // this.seenSpaces = {};
     if (!this.currentLevel.isFreeCell(this.player.x, this.player.y)) {
       const cell = this.currentLevel.popOpenFreeSpace();
       this.player.draw(cell.x, cell.y);

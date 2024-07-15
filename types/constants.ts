@@ -13,6 +13,8 @@ export const dimensions = {
   WIDTH: 80,
 };
 
+export const MAX_LEVEL = 10;
+
 export const symbols = {
   WALL: '█',
   POTION: 'ɋ',
