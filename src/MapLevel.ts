@@ -1,6 +1,7 @@
 import {Map, RNG} from 'rot-js';
 import {dimensions} from '../types/constants';
 import {Cell, CellType, Coordinate, VisibilityStatus} from '../types/sharedTypes';
+import {Enemy} from './Enemy';
 import {Game} from './Game';
 import {Ladder} from './Ladder';
 
@@ -8,6 +9,8 @@ export class MapLevel {
   levelNumber: number;
 
   game: Game;
+
+  enemies: Enemy[];
 
   exits: Ladder[];
 
@@ -19,6 +22,7 @@ export class MapLevel {
     this.levelNumber = levelNumber;
     this.game = game;
     this.exits = [];
+    this.enemies = [];
     this.cells = {};
 
     for (let y = 0; y < dimensions.HEIGHT; y++) {
@@ -64,6 +68,7 @@ export class MapLevel {
     digger.create(digCallback);
 
     this.addExitLadder();
+    this.addAllEnemies();
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -72,11 +77,9 @@ export class MapLevel {
   }
 
   isFreeCell(x: number, y: number): boolean {
-    // const level = mapLevel !== undefined ? mapLevel : this.currentLevel;
     return (
       this.isValidCoordinate(x, y) &&
-      // (!game.dungeonMap?.[level] ||
-      //   this.currentLevel.monsters.every((monster) => monster.x !== x || monster.y !== y)) &&
+      this.enemies.every((enemy) => enemy.x !== x || enemy.y !== y) &&
       this.isFreeOfStandingPlayers(x, y) &&
       this.cells[`${x},${y}`].isPassable
     );
@@ -84,6 +87,12 @@ export class MapLevel {
 
   isFreeOfStandingPlayers(x: number, y: number): boolean {
     return !this.game.player || this.game.player.x !== x || this.game.player.y !== y;
+  }
+
+  addAllEnemies(): void {
+    const freeSpace = this.popOpenFreeSpace();
+
+    this.enemies.push(new Enemy(this.game, freeSpace.x, freeSpace.y));
   }
 
   popOpenFreeSpace(): Cell {

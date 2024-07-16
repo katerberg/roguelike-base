@@ -3,8 +3,8 @@ import {Display, FOV, Scheduler} from 'rot-js';
 import SchedulerType from 'rot-js/lib/scheduler/scheduler';
 import * as tinycolor from 'tinycolor2';
 import {Actor} from '../types/Actor';
-import {colors, dimensions, MAX_LEVEL, symbols} from '../types/constants';
-import {CellType, Coordinate, DungeonMap, VisibilityStatus} from '../types/sharedTypes';
+import {dimensions, MAX_LEVEL, symbols} from '../types/constants';
+import {CellType, Coordinate, DungeonMap, GameColor, VisibilityStatus} from '../types/sharedTypes';
 import {MapLevel} from './MapLevel';
 import {coordsToNumberCoords} from './math';
 import {Player} from './Player';
@@ -53,19 +53,20 @@ export class Game {
   rebuild(): void {
     this.drawWalls();
     this.currentLevel.exits.forEach((exit) => {
-      this.display.draw(exit.x, exit.y, symbols.LADDER, colors.WHITE, null);
+      this.display.draw(exit.x, exit.y, symbols.LADDER, GameColor.WHITE, null);
     });
     this.player.draw();
-    // this.enemies.forEach(e => e.draw());
+    this.currentLevel.enemies.forEach((e) => e.draw());
   }
 
   nextLevel(): void {
     if (this.level === MAX_LEVEL) {
       return;
     }
+    this.level += 1;
     this.scheduler.clear();
     this.scheduler.add(this.player, true);
-    this.level += 1;
+    this.currentLevel.enemies.forEach((enemy) => this.scheduler.add(enemy, true));
     if (!this.currentLevel.isFreeCell(this.player.x, this.player.y)) {
       const cell = this.currentLevel.popOpenFreeSpace();
       this.player.draw(cell.x, cell.y);
@@ -107,23 +108,23 @@ export class Game {
 
   redrawSpace(x: number, y: number, faded: boolean): void {
     let symbol = symbols.OPEN;
-    let color = colors.FADED_WHITE;
+    let color: GameColor | string = GameColor.FADED_WHITE;
     const keyFormat: Coordinate = `${x},${y}`;
     if (this.player.x === x && this.player.y === y) {
       symbol = symbols.PLAYER;
-      color = colors.YELLOW;
-      // } else if (!faded && this.enemies.find((e) => e.x === x && e.y === y)) {
-      //   const enemy = this.enemies.find((e) => e.x === x && e.y === y);
-      //   ({color, symbol} = enemy);
+      color = GameColor.YELLOW;
+    } else if (!faded && this.currentLevel.enemies.find((e) => e.x === x && e.y === y)) {
+      const enemy = this.currentLevel.enemies.find((e) => e.x === x && e.y === y)!;
+      ({color, symbol} = enemy);
       // } else if (this.caches[keyFormat]) {
       //   symbol = symbols[this.caches[keyFormat].type.toUpperCase()];
-      //   color = colors.GREEN;
+      //   color = GameColor.GREEN;
     } else if (this.currentLevel.cells[keyFormat].type === CellType.Exit) {
       symbol = symbols.LADDER;
-      color = colors.WHITE;
+      color = GameColor.WHITE;
     } else if (this.currentLevel.cells[keyFormat].type === CellType.Wall) {
       symbol = symbols.WALL;
-      color = colors.WHITE;
+      color = GameColor.WHITE;
     }
     color = faded ? tinycolor(color).darken(30).toString() : color;
     this.display.draw(x, y, symbol, color, null);

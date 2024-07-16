@@ -1,12 +1,4 @@
-export const colors = {
-  BLACK: '#000',
-  YELLOW: '#ff0',
-  GREEN: '#0f0',
-  RED: '#f00',
-  WHITE: '#fefefe',
-  ORANGE: '#FF7034',
-  FADED_WHITE: '#777',
-};
+import {GameColor} from './sharedTypes';
 
 export const dimensions = {
   HEIGHT: 25,
@@ -50,7 +42,7 @@ export const enemies = {
     },
     xp: 1,
     dropPercentage: 10,
-    color: colors.RED,
+    color: GameColor.RED,
   },
   SKELETON: {
     type: 'Skeleton',
@@ -61,7 +53,7 @@ export const enemies = {
     },
     xp: 3,
     dropPercentage: 5,
-    color: colors.RED,
+    color: GameColor.RED,
   },
   TROLL: {
     type: 'Troll',
@@ -72,7 +64,7 @@ export const enemies = {
     },
     xp: 10,
     dropPercentage: 30,
-    color: colors.RED,
+    color: GameColor.RED,
   },
   DRAGON: {
     type: 'Dragon',
@@ -83,7 +75,7 @@ export const enemies = {
     },
     xp: 30,
     dropPercentage: 80,
-    color: colors.RED,
+    color: GameColor.RED,
   },
   BALROG: {
     type: 'Balrog',
@@ -94,7 +86,7 @@ export const enemies = {
     },
     xp: 0,
     dropPercentage: 0,
-    color: colors.ORANGE,
+    color: GameColor.ORANGE,
   },
 };
 

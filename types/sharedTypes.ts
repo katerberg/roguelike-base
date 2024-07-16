@@ -59,9 +59,12 @@ export type Cell = {
   items: Item[];
 };
 
-// export type MapLevel = {
-//   exits: Ladder[];
-//   cells: {
-//     [key: Coordinate]: Cell;
-//   };
-// };
+export enum GameColor {
+  BLACK = '#000',
+  YELLOW = '#ff0',
+  GREEN = '#0f0',
+  RED = '#f00',
+  WHITE = '#fefefe',
+  ORANGE = '#FF7034',
+  FADED_WHITE = '#777',
+}
