@@ -140,10 +140,16 @@ export class Game {
       this.redrawSpace(x, y, this.currentLevel.cells[key].visibilityStatus !== VisibilityStatus.Visible);
     });
     (Object.keys(this.currentLevel.cells) as Coordinate[]).forEach((key) => {
-      if (this.currentLevel.cells[key].visibilityStatus === VisibilityStatus.Visible && !seenThisRun[key]) {
-        this.currentLevel.cells[key].visibilityStatus = VisibilityStatus.Seen;
+      if (!seenThisRun[key]) {
         const numberCoordinates = coordsToNumberCoords(key);
-        this.redrawSpace(numberCoordinates.x, numberCoordinates.y, true);
+        // Ensure previously seen items are drawn faded
+        if (this.currentLevel.cells[key].visibilityStatus === VisibilityStatus.Seen) {
+          this.redrawSpace(numberCoordinates.x, numberCoordinates.y, true);
+          // Clean up previously visible items
+        } else if (this.currentLevel.cells[key].visibilityStatus === VisibilityStatus.Visible) {
+          this.currentLevel.cells[key].visibilityStatus = VisibilityStatus.Seen;
+          this.redrawSpace(numberCoordinates.x, numberCoordinates.y, true);
+        }
       }
     });
   }
