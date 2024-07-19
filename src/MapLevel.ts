@@ -1,6 +1,6 @@
-import {Map, RNG} from 'rot-js';
+import {Map, Path, RNG} from 'rot-js';
 import {dimensions} from '../types/constants';
-import {Cell, CellType, Coordinate, VisibilityStatus} from '../types/sharedTypes';
+import {Cell, CellType, Coordinate, EnemyType, NumberCoordinates, VisibilityStatus} from '../types/sharedTypes';
 import {Enemy} from './Enemy';
 import {Game} from './Game';
 import {Ladder} from './Ladder';
@@ -89,10 +89,20 @@ export class MapLevel {
     return !this.game.player || this.game.player.x !== x || this.game.player.y !== y;
   }
 
+  isEnemyInSpace(x: number, y: number, idToIgnore?: string): boolean {
+    return this.enemies.filter((e) => e.x === x && e.y === y && e.id !== idToIgnore).length > 0;
+  }
+
   addAllEnemies(): void {
     const freeSpace = this.popOpenFreeSpace();
 
-    this.enemies.push(new Enemy(this.game, freeSpace.x, freeSpace.y));
+    this.enemies.push(new Enemy(this.game, freeSpace.x, freeSpace.y, EnemyType.Goblin));
+  }
+
+  removeEnemy(enemy: Enemy): void {
+    this.game.scheduler.remove(enemy);
+    this.enemies = this.enemies.filter((e) => e.id !== enemy.id);
+    this.game.drawFov();
   }
 
   popOpenFreeSpace(): Cell {
@@ -106,6 +116,29 @@ export class MapLevel {
     this.cells[`${ladderCell.x},${ladderCell.y}`].type = CellType.Exit;
     ladderCell.type = CellType.Exit;
     this.exits.push(new Ladder(ladderCell.x, ladderCell.y));
+  }
+
+  calculatePath(
+    start: NumberCoordinates,
+    targetX: number,
+    targetY: number,
+    pathableFunction: (x: number, y: number, game: Game) => boolean,
+  ): Coordinate[] {
+    //a star
+    const aStar = new Path.AStar(
+      targetX,
+      targetY,
+      (astarX: number, astarY: number): boolean =>
+        (astarX === start.x && astarY === start.y) || pathableFunction(astarX, astarY, this.game),
+    );
+    const path: Coordinate[] = [];
+    aStar.compute(start.x, start.y, (computeX, computeY) => {
+      path.push(`${computeX},${computeY}`);
+    });
+    if (path.length > 0) {
+      path.shift();
+    }
+    return path;
   }
 
   get freeCells(): Cell[] {

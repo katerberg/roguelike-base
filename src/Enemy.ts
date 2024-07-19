@@ -1,76 +1,64 @@
-// import {RNG} from 'rot-js';
+import {RNG} from 'rot-js';
 import {v4 as uuid} from 'uuid';
-// import Cache from './Cache';
-// import {enemies} from '../types/constants';
 import {Actor} from '../types/Actor';
-import {GameColor} from '../types/sharedTypes';
+import {Combatant} from '../types/Combatant';
+import {getEnemyDetails} from '../types/enemies';
+import {isValidKey} from '../types/keymaps';
+import {Coordinate, EnemyType, GameColor} from '../types/sharedTypes';
 import {Game} from './Game';
+import {coordsToNumberCoords} from './math';
 
-export class Enemy implements Actor {
+export class Enemy implements Actor, Combatant {
   id: string;
 
   x: number;
 
   y: number;
 
-  // name: string;
+  xp: number;
 
-  // type: string;
+  type: EnemyType;
 
-  // xp: number;
-
-  // color: string;
-
-  // item: Cache | null;
+  color: GameColor;
 
   currentHp: number;
 
-  // symbol: string;
+  symbol: string;
 
   game: Game;
 
-  // stats: {
-  //   strength: number;
-  //   dexterity: number;
-  //   maxHp: number;
-  // };
+  target: Coordinate | null;
 
-  constructor(
-    game: Game,
-    x: number,
-    y: number,
-    // enemy: any,
-    // name: string,
-  ) {
+  stats: {
+    strength: number;
+    dexterity: number;
+    maxHp: number;
+  };
+
+  constructor(game: Game, x: number, y: number, type: EnemyType) {
     this.game = game;
     this.id = uuid();
     this.x = x;
     this.y = y;
-    // this.name = name;
-    // this.type = enemy.type;
-    // [this.symbol] = this.type.split('');
-    // this.stats = {
-    //   ...enemy.stats,
-    // };
-    // this.xp = enemy.xp;
-    // this.item =
-    //   enemy.dropPercentage > RNG.getPercentage() ? new Cache(this.game.level, 'Potion', 'healer', 0, 0, this.xp) : null;
-    // this.color = enemy.color;
-    // this.currentHp = this.stats.maxHp;
-    this.currentHp = 3;
+    this.type = type;
+    const details = getEnemyDetails(type);
+    this.xp = details.xp;
+    this.symbol = details.symbol;
+    this.stats = {
+      ...details.stats,
+    };
+    this.target = null;
+    this.color = details.color;
+    this.currentHp = this.stats.maxHp;
   }
 
-  get color(): GameColor {
-    return GameColor.RED;
+  addXp(xp: number): void {
+    this.xp += xp;
   }
 
-  get symbol(): string {
-    return 'g';
+  get coordinates(): Coordinate {
+    return `${this.x},${this.y}`;
   }
-
-  // get coordinates() {
-  //   return `${this.x},${this.y}`;
-  // }
 
   // get path() {
   //   const aStarCallback = (x, y) => `${x},${y}` in this.game.map;
@@ -82,25 +70,40 @@ export class Enemy implements Actor {
   //   path.shift();
   //   return path;
   // }
-
-  // isEnemyInSpace(x, y) {
-  //   return this.game.enemies.filter((e) => e.id !== this.id && e.x === x && e.y === y).length;
-  // }
+  isMonsterPathableCell(x: number, y: number): boolean {
+    return (
+      this.game.currentLevel.isValidCoordinate(x, y) &&
+      this.game.currentLevel.enemies.every((enemy) => enemy.x !== x || enemy.y !== y) &&
+      this.game.currentLevel.cells[`${x},${y}`].isPassable
+    );
+  }
 
   act(): Promise<() => void> {
     // const playerX = this.game.player.x;
     // const playerY = this.game.player.y;
-    // const {path} = this;
-    // if (path[0] && !this.isEnemyInSpace(path[0][0], path[0][1])) {
-    //   const [[nextX, nextY]] = path;
-    //   if (nextX === playerX && nextY === playerY) {
-    //     console.log('attack');
-    //     // this.game.player.takeDamage(this.stats.strength, this);
-    //   } else {
-    // this.draw(nextX, nextY);
+    if (!this.target) {
+      return Promise.resolve(() => {});
+    }
+    const {x, y} = coordsToNumberCoords(this.target);
+    const playerCoordinates = {x: this.game.player.x, y: this.game.player.y};
+    if (
+      playerCoordinates.x === x &&
+      playerCoordinates.y === y &&
+      Math.abs(x - this.x) <= 1 &&
+      Math.abs(y - this.y) <= 1
+    ) {
+      console.log('attacking player');
+      // handleMonsterAttackPlayer(monster, player, game);
+    } else {
+      const path = this.game.currentLevel.calculatePath({x: this.x, y: this.y}, x, y, this.isMonsterPathableCell);
+      if (path.length > 0) {
+        const {x: newX, y: newY} = coordsToNumberCoords(path[0]);
+        this.x = newX;
+        this.y = newY;
+      }
+    }
+
     this.draw(this.x, this.y);
-    //   }
-    // }
     return Promise.resolve(() => {});
   }
 
@@ -112,24 +115,24 @@ export class Enemy implements Actor {
     this.game.drawFov();
   }
 
-  // calculateDamage(incomingDamage, source) {
-  //   const dexDiff = this.stats.dexterity - source.stats.dexterity;
-  //   if (RNG.getPercentage() < dexDiff) {
-  //     return 0;
-  //   }
-  //   return incomingDamage;
-  // }
+  calculateDamage(incomingDamage: number, source: Combatant): number {
+    const dexDiff = this.stats.dexterity - source.stats.dexterity;
+    if (RNG.getPercentage() < dexDiff) {
+      return 0;
+    }
+    return incomingDamage;
+  }
 
-  // takeDamage(incomingDamage, source) {
-  //   const damage = this.calculateDamage(incomingDamage, source);
-  //   this.currentHp -= damage;
-  //   if (this.currentHp <= 0) {
-  //     this.game.removeEnemy(this);
-  //     source.addXp(this.xp);
-  //     if (this.type === enemies.BALROG.type) {
-  //       source.releaseInput();
-  //       this.game.winGame();
-  //     }
-  //   }
-  // }
+  takeDamage(incomingDamage: number, source: Combatant): void {
+    const damage = this.calculateDamage(incomingDamage, source);
+    this.currentHp -= damage;
+    if (this.currentHp <= 0) {
+      this.game.currentLevel.removeEnemy(this);
+      source.addXp(this.xp);
+      // if (this.type === enemies.BALROG.type) {
+      //   source.releaseInput();
+      //   this.game.winGame();
+      // }
+    }
+  }
 }

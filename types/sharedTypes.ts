@@ -39,6 +39,24 @@ export enum ItemType {
   Potion,
 }
 
+export enum EnemyType {
+  Goblin,
+}
+
+export type EnemyDetails = {
+  name: string;
+  type: EnemyType;
+  symbol: string;
+  stats: {
+    strength: number;
+    dexterity: number;
+    maxHp: number;
+  };
+  xp: number;
+  dropPercentage: number;
+  color: GameColor;
+};
+
 export type Item = {
   itemId: string;
   type: ItemType;

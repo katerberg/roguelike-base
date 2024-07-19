@@ -75,6 +75,7 @@ export class Game {
     this.drawFov();
   }
 
+
   drawWalls(): void {
     for (let i = 0; i < dimensions.WIDTH; i++) {
       for (let j = 0; j < dimensions.HEIGHT; j++) {

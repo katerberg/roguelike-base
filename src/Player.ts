@@ -1,10 +1,11 @@
 import {DIRS} from 'rot-js';
 import {Actor} from '../types/Actor';
+import {Combatant} from '../types/Combatant';
 import {MovementKey, getMovement, isValidKey, isMovementKey, modalChoices} from '../types/keymaps';
 import {Game} from './Game';
 import {Modal} from './Modal';
 
-export class Player implements EventListenerObject, Actor {
+export class Player implements EventListenerObject, Actor, Combatant {
   // eslint-disable-next-line class-methods-use-this
   resolver: () => void = () => {};
 
@@ -14,10 +15,24 @@ export class Player implements EventListenerObject, Actor {
 
   y: number;
 
+  xp: number;
+
+  stats: {strength: number; dexterity: number; maxHp: number};
+
   constructor(game: Game, x: number, y: number) {
     this.game = game;
     this.x = x;
     this.y = y;
+    this.xp = 0;
+    this.stats = {
+      maxHp: 5,
+      strength: 1,
+      dexterity: 1,
+    };
+  }
+
+  addXp(xp: number): void {
+    this.xp += xp;
   }
 
   releaseInput(): void {
