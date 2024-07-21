@@ -85,6 +85,9 @@ export class MapLevel {
     );
   }
 
+  isTransparentCell = (x: number, y: number): boolean =>
+    this.isValidCoordinate(x, y) && this.cells[`${x},${y}`].isPassable;
+
   isFreeOfStandingPlayers(x: number, y: number): boolean {
     return !this.game.player || this.game.player.x !== x || this.game.player.y !== y;
   }

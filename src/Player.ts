@@ -1,4 +1,4 @@
-import {DIRS} from 'rot-js';
+import {DIRS, RNG} from 'rot-js';
 import {Actor} from '../types/Actor';
 import {Combatant} from '../types/Combatant';
 import {MovementKey, getMovement, isValidKey, isMovementKey, modalChoices} from '../types/keymaps';
@@ -15,9 +15,13 @@ export class Player implements EventListenerObject, Actor, Combatant {
 
   y: number;
 
+  currentHp: number;
+
   xp: number;
 
   stats: {strength: number; dexterity: number; maxHp: number};
+
+  type = 'Player' as const;
 
   constructor(game: Game, x: number, y: number) {
     this.game = game;
@@ -29,6 +33,7 @@ export class Player implements EventListenerObject, Actor, Combatant {
       strength: 1,
       dexterity: 1,
     };
+    this.currentHp = this.stats.maxHp;
   }
 
   addXp(xp: number): void {
@@ -140,6 +145,43 @@ export class Player implements EventListenerObject, Actor, Combatant {
       //   this.handleOpenMenu();
       // } else if (validKeymap[keyCode] === 'Gear') {
       //   this.handleOpenInventory();
+    }
+  }
+
+  calculateDamage(incomingDamage: number, source: Combatant): number {
+    const dexDiff = this.stats.dexterity - source.stats.dexterity;
+    if (RNG.getPercentage() < dexDiff) {
+      return 0;
+    }
+    // if (this.gear.Armor) {
+    //   const percent = RNG.getPercentage() / 100;
+    //   const damage = Math.ceil(incomingDamage - this.gear.Armor.modifier * percent);
+    //   if (damage < 0) {
+    //     return 0;
+    //   }
+    //   return damage;
+    // }
+
+    return incomingDamage;
+  }
+
+  takeDamage(incomingDamage: number, source: Combatant): void {
+    const damage = this.calculateDamage(incomingDamage, source);
+    // if (damage === null) {
+    //   this.game.sendMessage(`You dodged the attack from a ${enemy.type.toLowerCase()}`);
+    // } else if (damage === 0) {
+    //   this.game.sendMessage(`Your armor absorbed all the damage from a ${enemy.type.toLowerCase()}`);
+    // } else {
+    //   this.game.sendMessage(`A ${enemy.type.toLowerCase()} hit you for ${damage} damage`);
+    // }
+    this.currentHp -= damage;
+    if (this.currentHp <= 0) {
+      this.currentHp = 0;
+    }
+    this.draw();
+    if (this.currentHp === 0) {
+      this.releaseInput();
+      this.game.loseGame(source);
     }
   }
 

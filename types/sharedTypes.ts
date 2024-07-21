@@ -51,6 +51,7 @@ export type EnemyDetails = {
     strength: number;
     dexterity: number;
     maxHp: number;
+    viewRange: number;
   };
   xp: number;
   dropPercentage: number;

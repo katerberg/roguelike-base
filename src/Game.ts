@@ -3,10 +3,14 @@ import {Display, FOV, Scheduler} from 'rot-js';
 import SchedulerType from 'rot-js/lib/scheduler/scheduler';
 import * as tinycolor from 'tinycolor2';
 import {Actor} from '../types/Actor';
+import {Combatant} from '../types/Combatant';
 import {dimensions, MAX_LEVEL, symbols} from '../types/constants';
-import {CellType, Coordinate, DungeonMap, GameColor, VisibilityStatus} from '../types/sharedTypes';
+import {getEnemyDetails} from '../types/enemies';
+import {modalChoices} from '../types/keymaps';
+import {CellType, Coordinate, DungeonMap, EnemyType, GameColor, VisibilityStatus} from '../types/sharedTypes';
 import {MapLevel} from './MapLevel';
 import {coordsToNumberCoords} from './math';
+import {Modal} from './Modal';
 import {Player} from './Player';
 
 export class Game {
@@ -47,6 +51,7 @@ export class Game {
     });
     this.drawWalls();
     this.populatePlayer();
+    this.currentLevel.enemies.forEach((enemy) => this.scheduler.add(enemy, true));
     this.init();
   }
 
@@ -74,7 +79,6 @@ export class Game {
     this.drawWalls();
     this.drawFov();
   }
-
 
   drawWalls(): void {
     for (let i = 0; i < dimensions.WIDTH; i++) {
@@ -153,6 +157,21 @@ export class Game {
         }
       }
     });
+  }
+
+  playAgainCallback(res: string): void {
+    this.resetAll();
+    if (res === 'false') {
+      console.log('done');
+      // this.player.handleOpenMenu();
+    }
+  }
+
+  loseGame(source: Combatant): void {
+    // this.storeState(true);
+    this.scheduler.clear();
+    const text = `You have lost after taking a brutal blow from a roaming ${source.type === 'Player' ? 'Player' : getEnemyDetails(source.type).name}.\n\nWould you like to play again?`;
+    new Modal(this.display, this.playAgainCallback.bind(this), text, 40, 20, 5, modalChoices.yn);
   }
 
   async nextTurn(): Promise<boolean> {

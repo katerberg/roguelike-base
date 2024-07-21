@@ -11,6 +11,7 @@ export function getEnemyDetails(enemy: EnemyType): EnemyDetails {
           strength: 1,
           dexterity: 1,
           maxHp: 3,
+          viewRange: 10,
         },
         xp: 1,
         dropPercentage: 10,

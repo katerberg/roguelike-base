@@ -1,9 +1,8 @@
-import {RNG} from 'rot-js';
+import {FOV, RNG} from 'rot-js';
 import {v4 as uuid} from 'uuid';
 import {Actor} from '../types/Actor';
 import {Combatant} from '../types/Combatant';
 import {getEnemyDetails} from '../types/enemies';
-import {isValidKey} from '../types/keymaps';
 import {Coordinate, EnemyType, GameColor} from '../types/sharedTypes';
 import {Game} from './Game';
 import {coordsToNumberCoords} from './math';
@@ -16,6 +15,8 @@ export class Enemy implements Actor, Combatant {
   y: number;
 
   xp: number;
+
+  viewRange: number;
 
   type: EnemyType;
 
@@ -44,6 +45,7 @@ export class Enemy implements Actor, Combatant {
     const details = getEnemyDetails(type);
     this.xp = details.xp;
     this.symbol = details.symbol;
+    this.viewRange = details.stats.viewRange;
     this.stats = {
       ...details.stats,
     };
@@ -79,8 +81,7 @@ export class Enemy implements Actor, Combatant {
   }
 
   act(): Promise<() => void> {
-    // const playerX = this.game.player.x;
-    // const playerY = this.game.player.y;
+    this.setTargetIfNeeded();
     if (!this.target) {
       return Promise.resolve(() => {});
     }
@@ -92,10 +93,14 @@ export class Enemy implements Actor, Combatant {
       Math.abs(x - this.x) <= 1 &&
       Math.abs(y - this.y) <= 1
     ) {
-      console.log('attacking player');
-      // handleMonsterAttackPlayer(monster, player, game);
+      this.attackPlayer();
     } else {
-      const path = this.game.currentLevel.calculatePath({x: this.x, y: this.y}, x, y, this.isMonsterPathableCell);
+      const path = this.game.currentLevel.calculatePath(
+        {x: this.x, y: this.y},
+        x,
+        y,
+        this.isMonsterPathableCell.bind(this),
+      );
       if (path.length > 0) {
         const {x: newX, y: newY} = coordsToNumberCoords(path[0]);
         this.x = newX;
@@ -105,6 +110,30 @@ export class Enemy implements Actor, Combatant {
 
     this.draw(this.x, this.y);
     return Promise.resolve(() => {});
+  }
+
+  attackPlayer(): void {
+    const damage = this.stats.strength;
+    this.game.player.takeDamage(damage, this);
+  }
+
+  isPlayerInView(): boolean {
+    const viewLines = new FOV.PreciseShadowcasting(this.game.currentLevel.isTransparentCell);
+
+    let playerInView = false;
+
+    viewLines.compute(this.x, this.y, this.viewRange, (x, y) => {
+      if (this.game.player.x === x && this.game.player.y === y) {
+        playerInView = true;
+      }
+    });
+    return playerInView;
+  }
+
+  setTargetIfNeeded(): void {
+    if (this.isPlayerInView()) {
+      this.target = `${this.game.player.x},${this.game.player.y}`;
+    }
   }
 
   draw(x?: number, y?: number): void {
