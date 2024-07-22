@@ -136,6 +136,9 @@ export class Game {
   }
 
   drawFov(): void {
+    if (this.player.isDead) {
+      return;
+    }
     const fov = new FOV.PreciseShadowcasting(this.lightPasses.bind(this));
     const seenThisRun: {[cellKey: Coordinate]: boolean} = {};
     fov.compute(this.player.x, this.player.y, 500, (x, y) => {

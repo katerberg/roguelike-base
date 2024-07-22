@@ -36,6 +36,10 @@ export class Player implements EventListenerObject, Actor, Combatant {
     this.currentHp = this.stats.maxHp;
   }
 
+  get isDead(): boolean {
+    return this.currentHp <= 0;
+  }
+
   addXp(xp: number): void {
     this.xp += xp;
   }
