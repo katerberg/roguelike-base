@@ -40,6 +40,12 @@ export class Player implements EventListenerObject, Actor, Combatant {
     return this.currentHp <= 0;
   }
 
+  get damage(): number {
+    const modifier = 0;
+    // const modifier = this.gear.Weapon ? this.gear.Weapon.modifier : 0;
+    return this.stats.strength + modifier;
+  }
+
   addXp(xp: number): void {
     this.xp += xp;
   }
@@ -63,15 +69,17 @@ export class Player implements EventListenerObject, Actor, Combatant {
     const [xChange, yChange] = DIRS[4][getMovement(key)];
     const newX = this.x + xChange;
     const newY = this.y + yChange;
-    // const newSpace = `${newX},${newY}`;
-    if (!this.game.currentLevel.isFreeCell(newX, newY)) {
+    if (
+      !this.game.currentLevel.isValidCoordinate(newX, newY) ||
+      !this.game.currentLevel.cells[`${newX},${newY}`].isPassable
+    ) {
       return;
     }
-    // const enemyInSpace = this.game.getEnemyAt(newSpace);
-    // if (enemyInSpace) {
-    //   enemyInSpace.takeDamage(this.getDamage(), this);
-    //   return this.resolver();
-    // }
+    const enemyInSpace = this.game.currentLevel.getEnemyAt(`${newX},${newY}`);
+    if (enemyInSpace) {
+      enemyInSpace.takeDamage(this.damage, this);
+      return this.resolver();
+    }
     this.draw(newX, newY);
     const cell = this.game.currentLevel.cells[`${this.x},${this.y}`];
     // const contents = this.game.retrieveContents(this.coordinates);

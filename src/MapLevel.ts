@@ -4,6 +4,7 @@ import {Cell, CellType, Coordinate, EnemyType, NumberCoordinates, VisibilityStat
 import {Enemy} from './Enemy';
 import {Game} from './Game';
 import {Ladder} from './Ladder';
+import {coordsToNumberCoords} from './math';
 
 export class MapLevel {
   levelNumber: number;
@@ -94,6 +95,11 @@ export class MapLevel {
 
   isEnemyInSpace(x: number, y: number, idToIgnore?: string): boolean {
     return this.enemies.filter((e) => e.x === x && e.y === y && e.id !== idToIgnore).length > 0;
+  }
+
+  getEnemyAt(key: Coordinate): Enemy | null {
+    const {x, y} = coordsToNumberCoords(key);
+    return this.enemies.filter((e) => e.x === x && e.y === y)[0] ?? null;
   }
 
   addAllEnemies(): void {
