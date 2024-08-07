@@ -5,6 +5,7 @@ import {Combatant} from '../types/Combatant';
 import {getEnemyDetails} from '../types/enemies';
 import {Coordinate, EnemyType, GameColor} from '../types/sharedTypes';
 import {Game} from './Game';
+import {logMessage} from './logging';
 import {coordsToNumberCoords} from './math';
 
 export class Enemy implements Actor, Combatant {
@@ -155,6 +156,7 @@ export class Enemy implements Actor, Combatant {
   takeDamage(incomingDamage: number, source: Combatant): void {
     const damage = this.calculateDamage(incomingDamage, source);
     this.currentHp -= damage;
+    logMessage(`You hit ${getEnemyDetails(this.type).name} for ${damage} damage.`);
     if (this.currentHp <= 0) {
       this.game.currentLevel.removeEnemy(this);
       source.addXp(this.xp);

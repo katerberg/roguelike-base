@@ -1,8 +1,10 @@
 import {DIRS, RNG} from 'rot-js';
 import {Actor} from '../types/Actor';
 import {Combatant} from '../types/Combatant';
+import {getEnemyDetails} from '../types/enemies';
 import {MovementKey, getMovement, isValidKey, isMovementKey, modalChoices} from '../types/keymaps';
 import {Game} from './Game';
+import {logMessage} from './logging';
 import {Modal} from './Modal';
 
 export class Player implements EventListenerObject, Actor, Combatant {
@@ -179,13 +181,14 @@ export class Player implements EventListenerObject, Actor, Combatant {
 
   takeDamage(incomingDamage: number, source: Combatant): void {
     const damage = this.calculateDamage(incomingDamage, source);
-    // if (damage === null) {
-    //   this.game.sendMessage(`You dodged the attack from a ${enemy.type.toLowerCase()}`);
-    // } else if (damage === 0) {
-    //   this.game.sendMessage(`Your armor absorbed all the damage from a ${enemy.type.toLowerCase()}`);
-    // } else {
-    //   this.game.sendMessage(`A ${enemy.type.toLowerCase()} hit you for ${damage} damage`);
-    // }
+    const enemyName = source.type === 'Player' ? 'Player' : getEnemyDetails(source.type).name;
+    if (damage === null) {
+      logMessage(`You dodged the attack from a ${enemyName}`);
+    } else if (damage === 0) {
+      logMessage(`Your armor absorbed all the damage from a ${enemyName}`);
+    } else {
+      logMessage(`A ${enemyName} hit you for ${damage} damage`);
+    }
     this.currentHp -= damage;
     if (this.currentHp <= 0) {
       this.currentHp = 0;
