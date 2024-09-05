@@ -8,6 +8,7 @@
     "url": "https://github.com/katerberg/roguelike-base"
   },
   "dependencies": {
+    "phaser": "^3.80.1",
     "regenerator-runtime": "^0.13.3",
     "rot-js": "^2.2.0",
     "tinycolor2": "^1.6.0"

@@ -1,21 +1,22 @@
 import 'regenerator-runtime/runtime';
-import {Display, FOV, Scheduler} from 'rot-js';
+import {FOV, Scheduler} from 'rot-js';
 import SchedulerType from 'rot-js/lib/scheduler/scheduler';
 import * as tinycolor from 'tinycolor2';
 import {Actor} from '../types/Actor';
 import {Combatant} from '../types/Combatant';
 import {dimensions, MAX_LEVEL, symbols} from '../types/constants';
-import {getEnemyDetails} from '../types/enemies';
-import {modalChoices} from '../types/keymaps';
+// import {getEnemyDetails} from '../types/enemies';
+// import {modalChoices} from '../types/keymaps';
 import {CellType, Coordinate, DungeonMap, GameColor, VisibilityStatus} from '../types/sharedTypes';
-import {logMessage} from './logging';
 import {MapLevel} from './MapLevel';
 import {coordsToNumberCoords} from './math';
-import {Modal} from './Modal';
+// import {Modal} from './Modal';
 import {Player} from './Player';
 
-export class Game {
-  display: Display;
+export class Game extends Phaser.Scene {
+  // display: Display;
+
+  drawnTiles: {[position: Coordinate]: Phaser.GameObjects.Image} = {};
 
   dungeonMap!: DungeonMap;
 
@@ -28,12 +29,33 @@ export class Game {
   scheduler!: SchedulerType<Actor>;
 
   constructor() {
-    this.display = new Display({width: dimensions.WIDTH, height: dimensions.HEIGHT});
+    super();
+    // this.display = new Display({width: dimensions.WIDTH, height: dimensions.HEIGHT});
     this.devMode = window.location.href.indexOf('devmode') > -1;
     this.resetAll();
-    const container = this.display.getContainer();
-    if (container) {
-      document.body.appendChild(container);
+    // const container = this.display.getContainer();
+    // if (container) {
+    //   document.body.appendChild(container);
+    // }
+  }
+
+  preload(): void {
+    // https://opengameart.org/content/lots-of-free-2d-tiles-and-sprites-by-hyptosis
+    this.load.spritesheet('batch1', 'images/hyptosis_tile-art-batch-1.png', {frameWidth: 32, frameHeight: 32});
+  }
+
+  create(): void {
+    // this.add.image(16, 16, 'batch1', 20);
+    this.resetAll();
+    // this.renderAllSprites();
+  }
+
+  renderAllSprites(): void {
+    for (let j = 0; j < 18; j++) {
+      for (let i = 0; i < 25; i++) {
+        this.add.image(16 + i * 32, 16 + j * 32, 'batch1', i + j * 25);
+        this.add.text(16 + i * 32, 16 + j * 32, `${i + j * 25}`, {fontSize: '10px', color: '#000000'});
+      }
     }
   }
 
@@ -50,16 +72,17 @@ export class Game {
     this.dungeonMap.levels.forEach((level) => {
       level.exits = [];
     });
-    this.drawWalls();
+    this.createWalls();
     this.populatePlayer();
     this.currentLevel.enemies.forEach((enemy) => this.scheduler.add(enemy, true));
-    this.init();
+    // this.init();
   }
 
   rebuild(): void {
-    this.drawWalls();
+    this.createWalls();
     this.currentLevel.exits.forEach((exit) => {
-      this.display.draw(exit.x, exit.y, symbols.LADDER, GameColor.WHITE, null);
+      // TODO: Draw exits
+      // this.display.draw(exit.x, exit.y, symbols.LADDER, GameColor.WHITE, null);
     });
     this.player.draw();
     this.currentLevel.enemies.forEach((e) => e.draw());
@@ -77,15 +100,24 @@ export class Game {
       const cell = this.currentLevel.popOpenFreeSpace();
       this.player.draw(cell.x, cell.y);
     }
-    this.drawWalls();
+    this.createWalls();
     this.drawFov();
   }
 
-  drawWalls(): void {
+  createWalls(): void {
+    if (!this.add) {
+      return;
+    }
     for (let i = 0; i < dimensions.WIDTH; i++) {
       for (let j = 0; j < dimensions.HEIGHT; j++) {
         if (this.currentLevel.cells[`${i},${j}`].visibilityStatus === VisibilityStatus.Unseen) {
-          this.display.draw(i, j, symbols.WALL, null, null);
+          let tile = 20;
+          const {type} = this.currentLevel.cells[`${i},${j}`];
+          if (type === CellType.Wall) {
+            tile = 205;
+          }
+          this.drawnTiles[`${i},${j}`]?.destroy();
+          this.drawnTiles[`${i},${j}`] = this.add.image(16 + i * 32, 16 + j * 32, 'batch1', tile);
         }
       }
     }
@@ -133,7 +165,8 @@ export class Game {
       color = GameColor.WHITE;
     }
     color = faded ? tinycolor(color).darken(30).toString() : color;
-    this.display.draw(x, y, symbol, color, null);
+    // TODO: Draw spaces
+    // this.display.draw(x, y, symbol, color, null);
   }
 
   drawFov(): void {
@@ -174,8 +207,9 @@ export class Game {
   loseGame(source: Combatant): void {
     // this.storeState(true);
     this.scheduler.clear();
-    const text = `You have lost after taking a brutal blow from a roaming ${source.type === 'Player' ? 'Player' : getEnemyDetails(source.type).name}.\n\nWould you like to play again?`;
-    new Modal(this.display, this.playAgainCallback.bind(this), text, 40, 20, 5, modalChoices.yn);
+    // TODO: Lose game
+    // const text = `You have lost after taking a brutal blow from a roaming ${source.type === 'Player' ? 'Player' : getEnemyDetails(source.type).name}.\n\nWould you like to play again?`;
+    // new Modal(this.display, this.playAgainCallback.bind(this), text, 40, 20, 5, modalChoices.yn);
   }
 
   async nextTurn(): Promise<boolean> {
@@ -188,7 +222,7 @@ export class Game {
   }
 
   async init(): Promise<void> {
-    this.drawWalls();
+    this.createWalls();
     this.player.draw();
     // eslint-disable-next-line no-constant-condition
     while (1) {

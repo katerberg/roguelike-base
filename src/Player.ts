@@ -120,7 +120,8 @@ export class Player implements EventListenerObject, Actor, Combatant {
           this.game.nextLevel();
         }
       });
-      new Modal(this.game.display, nextLevelResponse, 'Are you ready to delve deeper?', 20, 20, 5, modalChoices.yn);
+      // TODO: Next level
+      // new Modal(this.game.display, nextLevelResponse, 'Are you ready to delve deeper?', 20, 20, 5, modalChoices.yn);
     } else {
       this.resolver();
     }
