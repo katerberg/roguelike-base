@@ -8,6 +8,7 @@ export type DungeonMap = {
 export enum TileOption {
   Grass = 20,
   Ladder = 126,
+  Player = 781,
   Wall = 205,
 }
 

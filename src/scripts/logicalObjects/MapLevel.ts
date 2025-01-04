@@ -9,15 +9,15 @@ import {Coordinate, TileOption} from '../types/sharedTypes';
 
 import MainScene from '../scenes/mainScene';
 import Cell from '../objects/Cell';
+import {Player} from '../objects/Player';
 
 export class MapLevel {
   levelNumber: number;
 
   game: MainScene;
+  player: Player;
 
   // enemies: Enemy[];
-
-  // exits: Ladder[];
 
   cells: {
     [key: Coordinate]: Cell;
@@ -26,7 +26,6 @@ export class MapLevel {
   constructor({levelNumber, game}: {game: MainScene; levelNumber: number}) {
     this.levelNumber = levelNumber;
     this.game = game;
-    // this.exits = [];
     // this.enemies = [];
     this.cells = {};
 
@@ -48,7 +47,6 @@ export class MapLevel {
 
     const digger = new Map.Digger(Math.ceil(dimensions.WIDTH - 50 + Math.pow(levelNumber, 2) / 2), dimensions.HEIGHT, {
       dugPercentage: levelNumber * 0.1,
-      // dugPercentage: 0.9,
       corridorLength: [0, 5],
     });
 
@@ -59,21 +57,16 @@ export class MapLevel {
 
       const key: Coordinate = `${x},${y}`;
       this.cells[key] = new Cell(this.game, x, y, TileOption.Grass);
-      // {
-      //   x,
-      //   y,
-      //   isEntrance: false,
-      //   isExit: false,
-      //   isPassable: true,
-      //   isWalkable: true,
-      //   type: CellType.Earth,
-      //   visibilityStatus: VisibilityStatus.Unseen,
-      //   items: [],
-      // };
     };
     digger.create(digCallback);
 
     this.addExitLadder();
+    const playerCell = this.getRandomCellMatching(
+      (cell) => this.isValidCoordinate(cell.x / CELL_WIDTH, cell.y / CELL_WIDTH) && cell.isPassable && !cell.isExit,
+    );
+    if (playerCell) {
+      this.player = new Player({scene: this.game, x: playerCell.x / CELL_WIDTH, y: playerCell.y / CELL_WIDTH, hp: 100});
+    }
     // this.addAllEnemies();
   }
 
@@ -93,6 +86,12 @@ export class MapLevel {
       // this.isFreeOfStandingPlayers(x, y) &&
       this.cells[`${x},${y}`].isPassable
     );
+  }
+
+  getRandomCellMatching(matchingFunction: (cell: Cell) => boolean): Cell | undefined {
+    const matchingCells = Object.values(this.cells).filter(matchingFunction);
+
+    return matchingCells[Math.floor(RNG.getUniform() * matchingCells.length)];
   }
 
   get freeCell(): Cell {

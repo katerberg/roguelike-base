@@ -29,7 +29,6 @@ export default class MainScene extends Phaser.Scene {
       currentLevel: 1,
       levels: {},
     };
-
     this.dungeonMap.levels[1] = this.createMap(1);
   }
 
