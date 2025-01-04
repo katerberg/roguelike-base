@@ -4,6 +4,7 @@ export const dimensions = {
 };
 
 export const MAX_LEVEL = 10;
+export const CELL_WIDTH = 32;
 
 export const symbols = {
   WALL: '█',

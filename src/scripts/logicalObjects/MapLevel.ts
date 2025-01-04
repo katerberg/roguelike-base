@@ -1,5 +1,5 @@
 import {Map, RNG} from 'rot-js';
-import {dimensions} from '../types/constants';
+import {CELL_WIDTH, dimensions} from '../types/constants';
 // import {Cell, CellType, Coordinate, EnemyType, NumberCoordinates, VisibilityStatus} from '../types/sharedTypes';
 import {Coordinate, TileOption} from '../types/sharedTypes';
 // import {Enemy} from './Enemy';
@@ -73,8 +73,12 @@ export class MapLevel {
     };
     digger.create(digCallback);
 
-    // this.addExitLadder();
+    this.addExitLadder();
     // this.addAllEnemies();
+  }
+
+  get exit(): Cell | undefined {
+    return Object.values(this.cells).find((cell) => cell.isExit);
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -83,10 +87,20 @@ export class MapLevel {
   }
 
   isFreeCell(x: number, y: number): boolean {
-    return this.isValidCoordinate(x, y);
-    // && this.enemies.every((enemy) => enemy.x !== x || enemy.y !== y) &&
-    // this.isFreeOfStandingPlayers(x, y) &&
-    // this.cells[`${x},${y}`].isPassable
+    return (
+      this.isValidCoordinate(x, y) &&
+      // && this.enemies.every((enemy) => enemy.x !== x || enemy.y !== y) &&
+      // this.isFreeOfStandingPlayers(x, y) &&
+      this.cells[`${x},${y}`].isPassable
+    );
+  }
+
+  get freeCell(): Cell {
+    const index = Math.floor(RNG.getUniform() * this.freeCells.length);
+    return this.freeCells.slice(index, index + 1)[0];
+  }
+  get freeCells(): Cell[] {
+    return Object.values(this.cells).filter((cell) => this.isFreeCell(cell.x / CELL_WIDTH, cell.y / CELL_WIDTH));
   }
 
   // isTransparentCell = (x: number, y: number): boolean =>
@@ -117,18 +131,10 @@ export class MapLevel {
   //   this.game.drawFov();
   // }
 
-  popOpenFreeSpace(): Cell {
-    const index = Math.floor(RNG.getUniform() * this.freeCells.length);
-    return this.freeCells.slice(index, index + 1)[0];
+  addExitLadder(): void {
+    const ladderCell = this.freeCell;
+    this.cells[`${ladderCell.x / CELL_WIDTH},${ladderCell.y / CELL_WIDTH}`].makeExit();
   }
-
-  // addExitLadder(): void {
-  //   const ladderCell = this.popOpenFreeSpace();
-  //   this.cells[`${ladderCell.x},${ladderCell.y}`].isExit = true;
-  //   this.cells[`${ladderCell.x},${ladderCell.y}`].type = CellType.Exit;
-  //   ladderCell.type = CellType.Exit;
-  //   this.exits.push(new Ladder(ladderCell.x, ladderCell.y));
-  // }
 
   // calculatePath(
   //   start: NumberCoordinates,
@@ -152,8 +158,4 @@ export class MapLevel {
   //   }
   //   return path;
   // }
-
-  get freeCells(): Cell[] {
-    return Object.values(this.cells).filter((cell) => this.isFreeCell(cell.x, cell.y));
-  }
 }
